@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            border: 0;
+        }
+
+        .all {
+            width: 750px;
+            height: 700px;
+            /*padding: 7px;*/
+            border: 1px solid #ccc;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .screen {
+            width: 750px;
+            height: 700px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen li {
+            width: 750px;
+            height: 700px;
+            overflow: hidden;
+            float: left;
+        }
+
+        .screen ul {
+            position: absolute;
+            left: 0;
+            top: 0px;
+            width: 8000px;
+        }
+
+        .all ol {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .all ol li {
+            float: left;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .all ol li.current {
+            background: yellow;
+        }
+
+        #arr {
+            display: none;
+        }
+
+        #arr span {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            margin-top: -20px;
+            background: deepskyblue;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: '黑体';
+            font-size: 30px;
+            color: #fff;
+            border: 1px solid #fff;
+        }
+
+        #arr #right {
+            right: 5px;
+            left: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="all" id='box'>
+    <div class="screen">
+        <ul>
+            <li><img src="thinkimages/1.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/2.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/3.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/4.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/5.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/6.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/7.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/8.jpg" width="750" height="700"/></li>
+            <li><img src="thinkimages/9.jpg" width="750" height="700"/></li>
+        </ul>
+        <ol>
+        </ol>
+    </div>
+    <div id="arr"><span id="left">&lt;</span><span id="right">&gt;</span></div>
+</div>
+<script>
+    // 动态的创建li
+    var box = document.getElementById("box");
+    var screen = box.children[0];
+    var ul = screen.children[0];
+    var ol = screen.children[1];
+    var ulLis = ul.children;
+    var arr = document.getElementById("arr");
+    var imgWith = ulLis[0].offsetWidth;
+    for (var i = 0; i < ulLis.length; i++) {
+        var li = document.createElement("li");
+        li.innerHTML = i + 1;
+        ol.appendChild(li);
+    }
+    var olLis = ol.children;
+    olLis[0].className = "current";
+    //鼠标悬浮在box 箭头出现
+    box.onmousemove = function () {
+        arr.style.display = "block";
+    }
+    box.onmouseout = function () {
+        arr.style.display = "none";
+    }
+    //鼠标悬浮小圆点  更改图片
+    // 涉资两个变量 用于后边的处理
+    var pic = 0;
+    var squ = 0;
+    for (var i = 0; i < olLis.length; i++) {
+        olLis[i].index = i;
+        olLis[i].onmouseover = function () {
+
+            animate(ul, {"left": -this.index * imgWith});
+            for (var j = 0; j < olLis.length; j++) {
+                olLis[j].className = "";
+            }
+            this.className = "current";
+            pic = squ = this.index;
+        }
+    }
+    var cloneImage = ulLis[0].cloneNode(true);
+    ul.appendChild(cloneImage);
+    // 获取到克隆的第一张图
+    var arrLeft = arr.children[0];
+    var arrRight = arr.children[1];
+    arrRight.onclick = function () {
+        // 这里使用pic和squ 分别保存图片的索引和小圆点的索引
+        /*要注意的是 当pic的等于长度减1 时就代表的 是最后一站图片即克隆的图片 此时
+        * ul的left变化 并且图片索引变为0  显示第一张  最后一张和第一张进行了切换
+        * 然后pic++ 继续执行 */
+        if (pic == ulLis.length - 1) {
+            ul.style.left = 0;
+            pic = 0;
+        }
+        pic++;
+        animate(ul, {"left": -pic * imgWith});
+        // 解决 下面的ollis的问题
+        /*当squ，即小圆点的索引 小于长度减1 的时候  点击右箭头 索引++ 当等于长度减1的时候
+        * 就是 到达了最后一个小圆点 这是 图片会相应的更换  只需把小圆点变成0 就好 此时的0 显示
+        * 的是克隆的那一张图片 再次点击 图片瞬间切换到第一张 并且缓动动画 显示第二张 此时 squ变成1 即小圆点变成2 继续循环即可*/
+        if (squ < olLis.length - 1) {
+            squ++;
+        } else {
+            squ = 0;
+        }
+        for (var k = 0; k < olLis.length; k++) {
+            olLis[k].className = "";
+        }
+        olLis[squ].className = "current";
+    }
+    arrLeft.onclick = function () {
+        if (pic == 0) {
+            ul.style.left = -imgWith * (ulLis.length - 1) + "px";
+            pic = ulLis.length - 1;
+        }
+        pic--;
+        animate(ul, {"left": -imgWith * pic});
+        if (squ > 0) {
+            squ--;
+        }
+        else {
+            squ = olLis.length - 1;
+        }
+        for (var k = 0; k < olLis.length; k++) {
+            olLis[k].className = "";
+        }
+        olLis[squ].className = "current";
+    }
+    for (var j = 0; j < ul.length; j++) {
+
+    }
+    // 强大的缓动动画函数
+    function animate(obj, json, fn) {//json {attr:target} 属性名：属性值
+        clearInterval(obj.timer)
+        obj.timer = setInterval(function () {
+            var flag = true;
+            for (var k in json) {
+                /*要注意 遍历的是json json里保存的是键值对的形式 对k 也就是键  对于透明度 层级 和
+                * 其他情况的时候 进行分类讨论 */
+                if (k === "opacity") {
+                    /*透明度没有取不到值得情况 并且没有单位 在计算step的时候 因为数值过小 所以
+                    * 放大100倍 进行粗略的计算*/
+                    var leader = getStyle(obj, k) * 100;
+                    var target = json[k] * 100;
+                    var step = (target - leader) / 10;
+                    step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                    leader = leader + step;
+                    obj.style[k] = leader / 100;
+                }
+                else if (k === "zIndex") {
+                    obj.style[k] = json[k];
+                } else {
+                    /*获取初始值leader 和 最终值target */
+                    var leader = parseInt(getStyle(obj, k) || 0);
+                    var target = json[k];
+                    var step = (target - leader) / 10;
+                    /*计算step*/
+                    step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                    leader = leader + step;
+                    obj.style[k] = leader + "px";
+                    /*加单位*/
+                }
+                /*设置flag  当对象所有的leader和赋值的target 一致的时候 结束定时器*/
+                if (leader !== target) {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                /*清除定时器 执行回调函数*/
+                clearInterval(obj.timer);
+                if (fn) {
+                    fn();
+                }
+            }
+
+        }, 15)
+    }
+
+    function getStyle(obj, attr) {
+        if (window.getComputedStyle) {
+            return window.getComputedStyle(obj, null)[attr];
+        } else {
+            return obj.currentStyle[attr];
+        }
+    }
+</script>
+</body>
+</html>
